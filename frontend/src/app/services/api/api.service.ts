@@ -235,7 +235,7 @@ export class ApiService {
     const resultPromise: AsyncFailable<AxiosResponse> = (async () => {
       try {
         const result = await axios.request({
-          url,
+          url: `http://sandbox.lan:8080${url}`,
           onDownloadProgress: (e) => {
             downloadProgress.next((e.loaded / (e.total ?? 1000000)) * 100);
           },

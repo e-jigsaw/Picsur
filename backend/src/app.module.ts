@@ -14,7 +14,7 @@ import { UsageManagerModule } from './managers/usage/usage.module';
 import { PicsurRoutesModule } from './routes/routes.module';
 
 const mainCorsConfig = cors({
-  origin: '<origin>',
+  origin: '*',
 });
 
 const imageCorsConfig = cors({

@@ -3,19 +3,19 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ImageEntryVariant } from 'picsur-shared/dist/dto/image-entry-variant.enum';
 import { AsyncFailable, Fail, FT, HasFailed } from 'picsur-shared/dist/types';
 import { LessThan, Repository } from 'typeorm';
-import { EImageDerivativeBackend } from '../../database/entities/images/image-derivative.entity';
-import { EImageFileBackend } from '../../database/entities/images/image-file.entity';
+import { EImageDerivativeBackendV2 } from '../../database/entities/images/image-derivative.entity.v2';
+import { EImageFileBackendV2 } from '../../database/entities/images/image-file.entity.v2';
 
 const A_DAY_IN_SECONDS = 24 * 60 * 60;
 
 @Injectable()
 export class ImageFileDBService {
   constructor(
-    @InjectRepository(EImageFileBackend)
-    private readonly imageFileRepo: Repository<EImageFileBackend>,
+    @InjectRepository(EImageFileBackendV2)
+    private readonly imageFileRepo: Repository<EImageFileBackendV2>,
 
-    @InjectRepository(EImageDerivativeBackend)
-    private readonly imageDerivativeRepo: Repository<EImageDerivativeBackend>,
+    @InjectRepository(EImageDerivativeBackendV2)
+    private readonly imageDerivativeRepo: Repository<EImageDerivativeBackendV2>,
   ) {}
 
   public async setFile(
@@ -24,7 +24,7 @@ export class ImageFileDBService {
     file: Buffer,
     filetype: string,
   ): AsyncFailable<true> {
-    const imageFile = new EImageFileBackend();
+    const imageFile = new EImageFileBackendV2();
     imageFile.image_id = imageId;
     imageFile.variant = variant;
     imageFile.filetype = filetype;
@@ -44,7 +44,7 @@ export class ImageFileDBService {
   public async getFile(
     imageId: string,
     variant: ImageEntryVariant,
-  ): AsyncFailable<EImageFileBackend> {
+  ): AsyncFailable<EImageFileBackendV2> {
     try {
       const found = await this.imageFileRepo.findOne({
         where: { image_id: imageId ?? '', variant: variant ?? '' },
@@ -61,7 +61,7 @@ export class ImageFileDBService {
     imageId: string,
     sourceVariant: ImageEntryVariant,
     targetVariant: ImageEntryVariant,
-  ): AsyncFailable<EImageFileBackend> {
+  ): AsyncFailable<EImageFileBackendV2> {
     try {
       const sourceFile = await this.getFile(imageId, sourceVariant);
       if (HasFailed(sourceFile)) return sourceFile;
@@ -76,7 +76,7 @@ export class ImageFileDBService {
   public async deleteFile(
     imageId: string,
     variant: ImageEntryVariant,
-  ): AsyncFailable<EImageFileBackend> {
+  ): AsyncFailable<EImageFileBackendV2> {
     try {
       const found = await this.imageFileRepo.findOne({
         where: { image_id: imageId, variant: variant },
@@ -119,8 +119,8 @@ export class ImageFileDBService {
     key: string,
     filetype: string,
     file: Buffer,
-  ): AsyncFailable<EImageDerivativeBackend> {
-    const imageDerivative = new EImageDerivativeBackend();
+  ): AsyncFailable<EImageDerivativeBackendV2> {
+    const imageDerivative = new EImageDerivativeBackendV2();
     imageDerivative.image_id = imageId;
     imageDerivative.key = key;
     imageDerivative.filetype = filetype;
@@ -138,7 +138,7 @@ export class ImageFileDBService {
   public async getDerivative(
     imageId: string,
     key: string,
-  ): AsyncFailable<EImageDerivativeBackend | null> {
+  ): AsyncFailable<EImageDerivativeBackendV2 | null> {
     try {
       const derivative = await this.imageDerivativeRepo.findOne({
         where: { image_id: imageId, key },

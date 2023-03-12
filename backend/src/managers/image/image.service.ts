@@ -19,13 +19,14 @@ import { ImageDBService } from '../../collections/image-db/image-db.service';
 import { ImageFileDBService } from '../../collections/image-db/image-file-db.service';
 import { SysPreferenceDbService } from '../../collections/preference-db/sys-preference-db.service';
 import { UsrPreferenceDbService } from '../../collections/preference-db/usr-preference-db.service';
-import { EImageDerivativeBackend } from '../../database/entities/images/image-derivative.entity';
-import { EImageFileBackend } from '../../database/entities/images/image-file.entity';
-import { EImageBackend } from '../../database/entities/images/image.entity';
+import { EImageDerivativeBackendV2 } from '../../database/entities/images/image-derivative.entity.v2';
+import { EImageFileBackendV2 } from '../../database/entities/images/image-file.entity.v2';
+import { EImageBackendV2 } from '../../database/entities/images/image.entity.v2';
 import { MutexFallBack } from '../../util/mutex-fallback';
 import { ImageConverterService } from './image-converter.service';
 import { ImageProcessorService } from './image-processor.service';
 import { WebPInfo } from './webpinfo/webpinfo';
+import { webcrypto } from 'crypto';
 
 @Injectable()
 export class ImageManagerService {
@@ -40,7 +41,7 @@ export class ImageManagerService {
     private readonly sysPref: SysPreferenceDbService,
   ) {}
 
-  public async findOne(id: string): AsyncFailable<EImageBackend> {
+  public async findOne(id: string): AsyncFailable<EImageBackendV2> {
     return await this.imagesService.findOne(id, undefined);
   }
 
@@ -48,15 +49,15 @@ export class ImageManagerService {
     count: number,
     page: number,
     userid: string | undefined,
-  ): AsyncFailable<FindResult<EImageBackend>> {
+  ): AsyncFailable<FindResult<EImageBackendV2>> {
     return await this.imagesService.findMany(count, page, userid);
   }
 
   public async update(
     id: string,
     userid: string | undefined,
-    options: Partial<Pick<EImageBackend, 'file_name' | 'expires_at'>>,
-  ): AsyncFailable<EImageBackend> {
+    options: Partial<Pick<EImageBackendV2, 'file_name' | 'expires_at'>>,
+  ): AsyncFailable<EImageBackendV2> {
     if (options.expires_at !== undefined && options.expires_at !== null) {
       if (options.expires_at < new Date()) {
         return Fail(FT.UsrValidation, 'Expiration date must be in the future');
@@ -68,14 +69,14 @@ export class ImageManagerService {
   public async deleteMany(
     ids: string[],
     userid: string | undefined,
-  ): AsyncFailable<EImageBackend[]> {
+  ): AsyncFailable<EImageBackendV2[]> {
     return await this.imagesService.delete(ids, userid);
   }
 
   public async deleteWithKey(
     imageId: string,
     key: string,
-  ): AsyncFailable<EImageBackend> {
+  ): AsyncFailable<EImageBackendV2> {
     return await this.imagesService.deleteWithKey(imageId, key);
   }
 
@@ -84,7 +85,11 @@ export class ImageManagerService {
     filename: string,
     image: Buffer,
     withDeleteKey: boolean,
-  ): AsyncFailable<EImageBackend> {
+  ): AsyncFailable<EImageBackendV2> {
+    const hash = Buffer.from(
+      new Uint8Array(await webcrypto.subtle.digest('SHA-256', image)),
+    ).toString('hex');
+    console.log(hash);
     const fileType = await this.getFileTypeFromBuffer(image);
     if (HasFailed(fileType)) return fileType;
 
@@ -108,6 +113,7 @@ export class ImageManagerService {
 
     // Save processed to db
     const imageEntity = await this.imagesService.create(
+      hash,
       userid,
       name,
       withDeleteKey,
@@ -139,7 +145,7 @@ export class ImageManagerService {
     imageId: string,
     fileType: string,
     options: ImageRequestParams,
-  ): AsyncFailable<EImageDerivativeBackend> {
+  ): AsyncFailable<EImageDerivativeBackendV2> {
     const targetFileType = ParseFileType(fileType);
     if (HasFailed(targetFileType)) return targetFileType;
 
@@ -189,7 +195,7 @@ export class ImageManagerService {
 
   // File getters ==============================================================
 
-  public async getMaster(imageId: string): AsyncFailable<EImageFileBackend> {
+  public async getMaster(imageId: string): AsyncFailable<EImageFileBackendV2> {
     return this.imageFilesService.getFile(imageId, ImageEntryVariant.MASTER);
   }
 
@@ -203,7 +209,9 @@ export class ImageManagerService {
     return ParseFileType(mime['master']);
   }
 
-  public async getOriginal(imageId: string): AsyncFailable<EImageFileBackend> {
+  public async getOriginal(
+    imageId: string,
+  ): AsyncFailable<EImageFileBackendV2> {
     return this.imageFilesService.getFile(imageId, ImageEntryVariant.ORIGINAL);
   }
 

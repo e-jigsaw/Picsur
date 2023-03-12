@@ -4,21 +4,23 @@ import { AsyncFailable, Fail, FT } from 'picsur-shared/dist/types';
 import { FindResult } from 'picsur-shared/dist/types/find-result';
 import { generateRandomString } from 'picsur-shared/dist/util/random';
 import { In, LessThan, Repository } from 'typeorm';
-import { EImageBackend } from '../../database/entities/images/image.entity';
+import { EImageBackendV2 } from '../../database/entities/images/image.entity.v2';
 
 @Injectable()
 export class ImageDBService {
   constructor(
-    @InjectRepository(EImageBackend)
-    private readonly imageRepo: Repository<EImageBackend>,
+    @InjectRepository(EImageBackendV2)
+    private readonly imageRepo: Repository<EImageBackendV2>,
   ) {}
 
   public async create(
+    hash: string,
     userid: string,
     filename: string,
     withDeleteKey: boolean,
-  ): AsyncFailable<EImageBackend> {
-    let imageEntity = new EImageBackend();
+  ): AsyncFailable<EImageBackendV2> {
+    let imageEntity = new EImageBackendV2();
+    imageEntity.id = hash;
     imageEntity.user_id = userid;
     imageEntity.created = new Date();
     imageEntity.file_name = filename;
@@ -39,7 +41,7 @@ export class ImageDBService {
   public async findOne(
     id: string,
     userid: string | undefined,
-  ): AsyncFailable<EImageBackend> {
+  ): AsyncFailable<EImageBackendV2> {
     try {
       const found = await this.imageRepo.findOne({
         where: { id, user_id: userid },
@@ -56,7 +58,7 @@ export class ImageDBService {
     count: number,
     page: number,
     userid: string | undefined,
-  ): AsyncFailable<FindResult<EImageBackend>> {
+  ): AsyncFailable<FindResult<EImageBackendV2>> {
     if (count < 1 || page < 0) return Fail(FT.UsrValidation, 'Invalid page');
     if (count > 100) return Fail(FT.UsrValidation, 'Too many results');
 
@@ -94,8 +96,8 @@ export class ImageDBService {
   public async update(
     id: string,
     userid: string | undefined,
-    options: Partial<Pick<EImageBackend, 'file_name' | 'expires_at'>>,
-  ): AsyncFailable<EImageBackend> {
+    options: Partial<Pick<EImageBackendV2, 'file_name' | 'expires_at'>>,
+  ): AsyncFailable<EImageBackendV2> {
     try {
       const found = await this.imageRepo.findOne({
         where: { id, user_id: userid },
@@ -119,7 +121,7 @@ export class ImageDBService {
   public async delete(
     ids: string[],
     userid: string | undefined,
-  ): AsyncFailable<EImageBackend[]> {
+  ): AsyncFailable<EImageBackendV2[]> {
     if (ids.length === 0) return [];
     if (ids.length > 500) return Fail(FT.UsrValidation, 'Too many results');
 
@@ -147,7 +149,7 @@ export class ImageDBService {
   public async deleteWithKey(
     id: string,
     key: string,
-  ): AsyncFailable<EImageBackend> {
+  ): AsyncFailable<EImageBackendV2> {
     try {
       const found = await this.imageRepo.findOne({
         where: { id, delete_key: key },

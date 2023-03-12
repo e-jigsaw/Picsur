@@ -6,7 +6,7 @@ const MONTH_IN_SECONDS = 60 * 60 * 24 * 30;
 const FIVE_MIN_IN_SECONDS = 60 * 5;
 
 export const EImageSchema = z.object({
-  id: IsEntityID(),
+  id: z.string(),
   user_id: IsEntityID(),
   created: z.preprocess((data: any) => new Date(data), z.date()),
   file_name: z.string(),

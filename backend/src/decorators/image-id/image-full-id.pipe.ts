@@ -1,7 +1,6 @@
 import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
 import { Ext2FileType } from 'picsur-shared/dist/dto/mimes.dto';
 import { Fail, FT, HasFailed } from 'picsur-shared/dist/types';
-import { UUIDRegex } from 'picsur-shared/dist/util/common-regex';
 import { ImageFullId } from '../../models/constants/image-full-id.const';
 
 @Injectable()
@@ -10,7 +9,7 @@ export class ImageFullIdPipe implements PipeTransform<string, ImageFullId> {
     const split = value.split('.');
     if (split.length === 2) {
       const [id, ext] = split;
-      if (!UUIDRegex.test(id))
+      if (id.length !== 64)
         throw Fail(FT.UsrValidation, 'Invalid image identifier');
 
       const filetype = Ext2FileType(ext);
@@ -22,7 +21,7 @@ export class ImageFullIdPipe implements PipeTransform<string, ImageFullId> {
     } else if (split.length === 1) {
       const [id] = split;
 
-      if (!UUIDRegex.test(id))
+      if (id.length !== 64)
         throw Fail(FT.UsrValidation, 'Invalid image identifier');
 
       return { variant: 'original', id, ext: null, filetype: null };

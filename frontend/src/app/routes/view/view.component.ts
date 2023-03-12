@@ -80,8 +80,11 @@ export class ViewComponent implements OnInit, OnDestroy {
     const width = window.innerWidth * window.devicePixelRatio;
 
     return (
-      this.imageService.GetImageURL(this.id, this.metadata.fileTypes.master, true) +
-      (width > 1 ? `?width=${width}&shrinkonly=yes` : '')
+      this.imageService.GetImageURL(
+        this.id,
+        this.metadata.fileTypes.master,
+        true,
+      ) + (width > 1 ? `?width=${width}&shrinkonly=yes` : '')
     );
   }
 
@@ -107,7 +110,7 @@ export class ViewComponent implements OnInit, OnDestroy {
       const params = this.route.snapshot.paramMap;
 
       this.id = params.get('id') ?? '';
-      if (!UUIDRegex.test(this.id)) {
+      if (this.id.length !== 64) {
         return this.errorService.quitError('Invalid image link', this.logger);
       }
     }

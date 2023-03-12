@@ -80,7 +80,7 @@ export class ViewComponent implements OnInit, OnDestroy {
     const width = window.innerWidth * window.devicePixelRatio;
 
     return (
-      this.imageService.GetImageURL(this.id, this.metadata.fileTypes.master) +
+      this.imageService.GetImageURL(this.id, this.metadata.fileTypes.master, true) +
       (width > 1 ? `?width=${width}&shrinkonly=yes` : '')
     );
   }

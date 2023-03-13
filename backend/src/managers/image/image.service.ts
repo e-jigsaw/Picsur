@@ -89,7 +89,6 @@ export class ImageManagerService {
     const hash = Buffer.from(
       new Uint8Array(await webcrypto.subtle.digest('SHA-256', image)),
     ).toString('hex');
-    console.log(hash);
     const fileType = await this.getFileTypeFromBuffer(image);
     if (HasFailed(fileType)) return fileType;
 

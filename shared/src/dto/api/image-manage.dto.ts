@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { EImageSchema } from '../../entities/image.entity';
 import { createZodDto } from '../../util/create-zod-dto';
 import { IsApiKey } from '../../validators/api-key.validator';
-import { IsEntityID } from '../../validators/entity-id.validator';
 import { IsPosInt } from '../../validators/positive-int.validator';
 
 // Image upload
@@ -51,7 +50,7 @@ export class ImageUpdateResponse extends createZodDto(
 // Image Delete
 
 export const ImageDeleteRequestSchema = z.object({
-  ids: z.array(z.string().uuid()),
+  ids: z.array(z.string()),
 });
 export class ImageDeleteRequest extends createZodDto(
   ImageDeleteRequestSchema,
@@ -66,7 +65,7 @@ export class ImageDeleteResponse extends createZodDto(
 
 // Image Delete with Key
 export const ImageDeleteWithKeyRequestSchema = z.object({
-  id: IsEntityID(),
+  id: z.string(),
   key: IsApiKey(),
 });
 export class ImageDeleteWithKeyRequest extends createZodDto(

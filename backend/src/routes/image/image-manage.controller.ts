@@ -7,7 +7,6 @@ import {
   Post,
   Res,
 } from '@nestjs/common';
-import { Throttle } from '@nestjs/throttler';
 import type { FastifyReply } from 'fastify';
 import {
   ImageDeleteRequest,
@@ -41,7 +40,6 @@ export class ImageManageController {
 
   @Post('upload')
   @Returns(ImageUploadResponse)
-  @Throttle(20)
   async uploadImage(
     @PostFiles(1) multipart: FileIterator,
     @ReqUserID() userid: string,

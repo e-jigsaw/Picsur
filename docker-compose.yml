@@ -1,5 +1,6 @@
 services:
   postgres:
+    profiles: ["dev"]
     image: postgres:17-alpine
     environment:
       POSTGRES_DB: kuv
@@ -20,13 +21,11 @@ services:
     environment:
       PORT: 3001
       KUV_JWT_SECRET: ${KUV_JWT_SECRET}
-      KUV_DB_HOST: postgres
-      KUV_DB_USER: kuv
-      KUV_DB_PASSWORD: kuv
-      KUV_DB_DATABASE: kuv
-    depends_on:
-      postgres:
-        condition: service_healthy
+      KUV_DB_HOST: ${KUV_DB_HOST:-postgres}
+      KUV_DB_PORT: ${KUV_DB_PORT:-5432}
+      KUV_DB_USER: ${KUV_DB_USER:-kuv}
+      KUV_DB_PASSWORD: ${KUV_DB_PASSWORD:-kuv}
+      KUV_DB_DATABASE: ${KUV_DB_DATABASE:-kuv}
 
   web:
     build:

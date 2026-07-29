@@ -130,3 +130,13 @@ nginx proxy manager の該当 proxy host の転送先を
 - 数日〜1週間ほど通常利用して問題ないことを確認
 - **ロールバック**: NPM の転送先を旧 CT に戻すだけ（旧系統は無傷で並走している）
 - 問題なければ旧 CT を停止（Proxmox 上で shutdown。削除はさらに様子を見てから）
+
+## 11. DB の mothership 移行 (2026-07-30)
+
+DB は CT141 内 docker postgres から pg-mothership (CT139) の `kuv` DB へ移行した。
+
+- compose の postgres サービスは `profiles: ["dev"]` の開発専用。本番では起動しない
+- 本番 CT の `/opt/kuv/.env` に `KUV_DB_HOST` / `KUV_DB_PASSWORD` を設定する
+- 手順・バックアップ (pgBackRest) は pg-mothership repo と rill `kuv` project の
+  `docs/superpowers/specs/2026-07-30-kuv-db-mothership-migration-design.md` を参照
+- 旧 volume `db-data` はロールバック用に残置 → 様子見後に `docker volume rm kuv_db-data`

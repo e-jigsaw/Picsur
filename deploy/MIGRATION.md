@@ -130,3 +130,12 @@ nginx proxy manager の該当 proxy host の転送先を
 - 数日〜1週間ほど通常利用して問題ないことを確認
 - **ロールバック**: NPM の転送先を旧 CT に戻すだけ（旧系統は無傷で並走している）
 - 問題なければ旧 CT を停止（Proxmox 上で shutdown。削除はさらに様子を見てから）
+
+## 11. DB の外部 PostgreSQL 移行 (2026-07-30)
+
+DB はホスト内 docker postgres から外部の共有 PostgreSQL へ移行した。
+
+- compose の postgres サービスは `profiles: ["dev"]` の開発専用。本番では起動しない
+- 本番ホストの `.env` に `KUV_DB_HOST` / `KUV_DB_PASSWORD` を設定する
+- バックアップは DB ホスト側で pgBackRest により行う（このリポジトリの管轄外）
+- 旧 volume `db-data` はロールバック用に残置 → 様子見後に `docker volume rm kuv_db-data`

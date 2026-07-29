@@ -35,4 +35,4 @@ env の読み取りは `packages/api/src/env.ts` に集約されている。`KUV
 
 - 認証は JWT cookie（`kuv_jwt`、`packages/api/src/middleware/auth.ts`）と API key ヘッダ。
 - 画像バイナリは Postgres に格納（ディスクではない）。本番 DB は pg-mothership (CT139) の `kuv` DB。compose の postgres は dev 専用 (`docker compose up -d postgres`)。
-- デプロイは docker-compose（Caddy + api + postgres）。稼働中の旧 Picsur CT からの blue-green 移行手順は rewrite-design spec の「Phase 5 の移行戦略」を参照。
+- デプロイは docker-compose（Caddy + api + web。DB は外部 pg-mothership）。稼働中の旧 Picsur CT からの blue-green 移行手順は rewrite-design spec の「Phase 5 の移行戦略」を参照。
